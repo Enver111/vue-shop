@@ -1,15 +1,14 @@
 <script setup>
-import Cart from "./components/Cart.vue";
+import CartList from "./components/CartList.vue";
 import Header from "./components/Header.vue";
 </script>
 
 <template>
   <div class="bg-white w-4/5 m-auto rounded-xl shadow-xl mt-14">
     <Header />
-    <h2 class="text-3xl font-bold">Все товары</h2>
-
-    <div>
-      <Cart />
+    <div class="p-10">
+      <h2 class="text-3xl font-bold mb-8">Все товары</h2>
+      <CartList />
     </div>
   </div>
 </template>
