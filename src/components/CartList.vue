@@ -3,7 +3,10 @@ import Cart from "./Cart.vue";
 
 defineProps({
   items: Array,
+  addToFavorite: Function,
 });
+
+const emit = defineEmits(["addToFavorite"]);
 </script>
 
 <template>
@@ -11,11 +14,12 @@ defineProps({
     <Cart
       v-for="item in items"
       :key="item.id"
+      :id="item.id"
       :image-url="item.imageUrl"
       :title="item.title"
       :price="item.price"
-      :is-added="false"
-      :isFavorite="false"
+      :onClickFavorite="() => emit('addToFavorite', item)"
+      :isFavorite="item.isFavorite"
     />
   </div>
 </template>

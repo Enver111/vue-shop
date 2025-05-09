@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { onMounted, provide, reactive, ref, watch } from "vue";
 import axios from "axios";
 import CartList from "./components/CartList.vue";
 import Drawer from "./components/Drawer.vue";
@@ -11,6 +11,53 @@ const filters = reactive({
   sortBy: "title",
   searshQuery: "",
 });
+
+const onChangeSelect = (event) => {
+  filters.sortBy = event.target.value;
+};
+
+const onChangeSearchInput = (event) => {
+  filters.searshQuery = event.target.value;
+};
+
+const fetchFavorites = async () => {
+  try {
+    const { data: favorites } = await axios.get(
+      `https://58419295808a7aa4.mokky.dev/favorites`
+    );
+    items.value = items.value.map((item) => {
+      const favorite = favorites.find(
+        (favorite) => favorite.productId === item.id
+      );
+
+      if (!favorite) {
+        return item;
+      }
+      return {
+        ...item,
+        isFavorite: true,
+        favoriteId: favorite.id,
+      };
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const addToFavorite = async (item) => {
+  try {
+    const obj = {
+      parentId: item.id,
+    };
+    const { data } = await axios.post(
+      `https://58419295808a7aa4.mokky.dev/favorites`,
+      obj
+    );
+    item.isFavorite = true;
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 const fetchItems = async () => {
   try {
@@ -25,21 +72,23 @@ const fetchItems = async () => {
       `https://58419295808a7aa4.mokky.dev/items`,
       { params }
     );
-    items.value = data;
+    items.value = data.map((obj) => ({
+      ...obj,
+      isFavorite: false,
+      isAdded: false,
+    }));
   } catch (error) {
     console.log(error);
   }
 };
 
-const onChangeSelect = (event) => {
-  filters.sortBy = event.target.value;
-};
-
-const onChangeSearchInput = (event) => {
-  filters.searshQuery = event.target.value;
-};
-onMounted(fetchItems);
+onMounted(async () => {
+  await fetchItems();
+  await fetchFavorites();
+});
 watch(filters, fetchItems);
+
+provide("addToFavorite", addToFavorite);
 </script>
 
 <template>
@@ -73,7 +122,7 @@ watch(filters, fetchItems);
         </div>
       </div>
       <div class="mt-10">
-        <CartList :items="items" />
+        <CartList :items="items" @addToFavorite="addToFavorite" />
       </div>
     </div>
   </div>
